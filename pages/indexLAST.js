@@ -104,41 +104,81 @@ const Index = () => {
 </tr>
 </thead>
 
-{ getDatesInRange(startDate, endDate).map(function(item, index) {
-return (
-<tbody>
-{item.getDay() == 0 && 
-    <tr className="border-2 border-black">
-        <td className="border-2 border-black text-sm text-center"> {index + 1}</td>
-        <td colSpan={6} className="border-2 border-black text-red-600 text-center tracking-wide">S u n d a y</td>
-    </tr>
-}
-{item.getDay() == 6 && 
-<tr className="border-2 border-black">
-    <td className="border-2 border-black text-sm text-center"> {index + 1}</td>
-    <td colSpan={6} className="border-2 border-black text-red-600 text-center tracking-wide">S a t u r d a y</td>
-</tr>
-}
+{getDatesInRange(d1, d2).map(function (item, index) {
+    const startIndex = selectedDays === '16-31' ? 16 : 1;
+    const currentIndex = index + startIndex;
 
-{item.getDay() != 6 && item.getDay() != 0 && 
-  <tr className="border-2 border-black">
-    <td className="border-2 border-black text-sm text-center"> {index + 1}</td>
-    <td className="border-2 border-black text-sm text-center"></td>
-    <td className="border-2 border-black text-sm text-center"></td>
-    <td className="border-2 border-black text-sm text-center"></td>
-    <td className="border-2 border-black text-sm text-center"></td>
-    <td className="border-2 border-black text-sm text-center"></td>
-    <td className="border-2 border-black text-sm text-center"></td>
-</tr>
-}
+    const matchingDate = attendance && attendance.find(day => {
+        const dayNumber = new Date(day.Date).getDate();
+        return dayNumber === currentIndex;
+    });
 
-</tbody>
+    const isMatchingMonthAndYear =
+        selectedDate.getFullYear() === (matchingDate && matchingDate.Year) &&
+        selectedDate.getMonth() + 1 === (matchingDate && matchingDate.Month);
 
-)
+    if (
+        selectedDate.getDay() !== 6 &&
+        selectedDate.getDay() !== 0 &&
+        attendance &&
+        isMatchingMonthAndYear &&
+        attendance[0].Name === matchingDate?.Name
+    ) {
+        // Calculate total hours by summing AM_In and AM_Out, and PM_In and PM_Out
+        const totalHoursAM = matchingDate?.AM_In && matchingDate?.AM_Out
+            ? calculateTotalHours(matchingDate.AM_In, matchingDate.AM_Out)
+            : null;
+        const totalHoursPM = matchingDate?.PM_In && matchingDate?.PM_Out
+            ? calculateTotalHours(matchingDate.PM_In, matchingDate.PM_Out)
+            : null;
 
+        return (
+            <tbody key={index}>
+                <tr className="border-2 border-black">
+                    <td className="border-2 border-black text-sm text-center">{currentIndex}</td>
+                    <td className="border-2 border-black text-sm text-center">{matchingDate?.AM_In}</td>
+                    <td className="border-2 border-black text-sm text-center">{matchingDate?.AM_Out}</td>
+                    <td className="border-2 border-black text-sm text-center">{matchingDate?.PM_In}</td>
+                    <td className="border-2 border-black text-sm text-center">{matchingDate?.PM_Out}</td>
+                    <td className="border-2 border-black text-sm text-center">Total Hours: </td>
+                    <td className="border-2 border-black text-sm text-center">
+                        {totalHoursAM && totalHoursPM ? totalHoursAM + totalHoursPM : null}
+                    </td>
+                </tr>
+            </tbody>
+        );
+    } else {
+        return (
+          <tbody key={index}>
+          {item.getDay() == 0 && (
+            <tr className="border-2 border-black">
+              <td className="border-2 border-black text-sm text-center"> {index + 1}</td>
+              <td colSpan={6} className="border-2 border-black text-red-600 text-center tracking-wide">S u n d a y</td>
+            </tr>
+          )}
+          {item.getDay() == 6 && (
+            <tr className="border-2 border-black">
+              <td className="border-2 border-black text-sm text-center"> {index + 1}</td>
+              <td colSpan={6} className="border-2 border-black text-red-600 text-center tracking-wide">S a t u r d a y</td>
+            </tr>
+          )}
 
-})
-} 
+          {item.getDay() != 6 && item.getDay() != 0 && (
+            <tr className="border-2 border-black">
+              <td className="border-2 border-black text-sm text-center"> {index + 1}</td>
+              <td className="border-2 border-black text-sm text-center"></td>
+              <td className="border-2 border-black text-sm text-center"></td>
+              <td className="border-2 border-black text-sm text-center"></td>
+              <td className="border-2 border-black text-sm text-center"></td>
+              <td className="border-2 border-black text-sm text-center"></td>
+              <td className="border-2 border-black text-sm text-center"></td>
+            </tr>
+          )}
+        </tbody>
+        );
+    }
+})}
+
 
 </table>
 
